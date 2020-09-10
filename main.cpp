@@ -4,7 +4,7 @@
 
 int main(const int argc, const char** argv) {
 	/// window setup	
-	sf::VideoMode mode(1024, 768);
+	sf::VideoMode mode(768, 512);
 	const char* name = "Simulation";
 	int style = sf::Style::Titlebar | sf::Style::Close;
 	sf::RenderWindow window(mode, name, style);
@@ -22,9 +22,8 @@ int main(const int argc, const char** argv) {
 	gui.add(info);
 	// team info label
 	auto team_info = tgui::Label::create();
-    team_info->setText("ITAtoms: Arnas Vaicekauskas, Justas Komza and tas 10okas kazkoks. Mentor: Ramune Simkuviene");
+    team_info->setText("ITAtoms: Arnas Vaicekauskas, Justas Komza and Elijus Zemgulis. Mentor: Ramune Simkuviene");
     team_info->setPosition(10, mode.height - team_info->getSize().y - 10);
-    //team_info->setTextSize(12);
     gui.add(team_info);
 	// start button
 	auto start = tgui::Button::create();
