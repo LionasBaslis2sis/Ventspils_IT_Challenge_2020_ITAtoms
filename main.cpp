@@ -13,6 +13,8 @@ int main(const int argc, const char** argv) {
 	tgui::Font font("res/consolas.ttf");
 	tgui::Theme theme("res/Black.txt");
 	tgui::Theme::setDefault(&theme);
+	// simulation
+	bool update = true;
 	/// gui
 	tgui::Gui gui(window);
 	// info label
@@ -30,14 +32,14 @@ int main(const int argc, const char** argv) {
     start->setPosition(10, 10);
     start->setText("Start");
     start->setSize(72, 32);
-    start->connect("pressed", [](){});
+    start->connect("pressed", [&](){update = true;});
     gui.add(start);
 	// stop button
 	auto stop = tgui::Button::create();
     stop->setPosition(92, 10);
     stop->setText("Stop");
     stop->setSize(72, 32);
-    stop->connect("pressed", [](){});
+    stop->connect("pressed", [&](){update = false;});
     gui.add(stop);
 	// exit button
 	auto exit = tgui::Button::create();
@@ -48,10 +50,17 @@ int main(const int argc, const char** argv) {
     gui.add(exit);
 	/// loop setup
 	sf::Clock clock;
+	long now = 0;
+	long last = 0;
+	// accumulated time
 	long t = 0;
 	/// loop
 	while(window.isOpen()) {
-		t = clock.getElapsedTime().asMilliseconds();
+		last = now;
+		now = clock.getElapsedTime().asMilliseconds();
+		if(update) {
+			t += now - last;
+		}
 		sstream << std::fixed << std::setprecision(2) << t / 1000.0f;
 		info->setText("time: " + sstream.str());
 		sstream.str("");
