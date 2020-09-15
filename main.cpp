@@ -2,7 +2,11 @@
 #include <TGUI/TGUI.hpp>
 #include <bits/stdc++.h>
 
+#include "src/simulation.hpp"
+
 int main(const int argc, const char** argv) {
+	// set random seed
+	srand(time(NULL));
 	/// window setup	
 	sf::VideoMode mode(768, 512);
 	const char* name = "Simulation";
@@ -14,7 +18,8 @@ int main(const int argc, const char** argv) {
 	tgui::Theme theme("res/Black.txt");
 	tgui::Theme::setDefault(&theme);
 	// simulation
-	bool update = true;
+	bool update = false;
+	Simulation sim(mode);
 	/// gui
 	tgui::Gui gui(window);
 	// info label
@@ -24,7 +29,7 @@ int main(const int argc, const char** argv) {
 	gui.add(info);
 	// team info label
 	auto team_info = tgui::Label::create();
-    team_info->setText("ITAtoms: Arnas Vaicekauskas, Justas Komza and Elijus Zemgulis. Mentor: Ramune Simkuviene");
+    team_info->setText("Developed within Ventspils IT challange 2020\nITAtoms: Arnas Vaicekauskas, Justas Komza and Elijus Zemgulis. Mentor: Ramune Simkuviene");
     team_info->setPosition(10, mode.height - team_info->getSize().y - 10);
     gui.add(team_info);
 	// start button
@@ -50,8 +55,7 @@ int main(const int argc, const char** argv) {
     gui.add(exit);
 	/// loop setup
 	sf::Clock clock;
-	long now = 0;
-	long last = 0;
+	long now = 0, last = 0, dt = 0;
 	// accumulated time
 	long t = 0;
 	/// loop
@@ -59,7 +63,9 @@ int main(const int argc, const char** argv) {
 		last = now;
 		now = clock.getElapsedTime().asMilliseconds();
 		if(update) {
-			t += now - last;
+			dt = now - last;
+			t += dt;
+			sim.iterate(dt);
 		}
 		sstream << std::fixed << std::setprecision(2) << t / 1000.0f;
 		info->setText("time: " + sstream.str());
@@ -70,6 +76,7 @@ int main(const int argc, const char** argv) {
 			gui.handleEvent(event);
 		}
 		window.clear();
+		window.draw(sim);
 		gui.draw();
 		window.display();
 	}
