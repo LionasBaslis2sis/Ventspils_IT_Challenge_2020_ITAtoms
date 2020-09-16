@@ -1,22 +1,26 @@
 #include "grid.hpp"
 
-Grid::Grid(const sf::Vector2i grid_size, const sf::Vector2f& tile_size) noexcept :
-width(grid_size.x), height(grid_size.y), count(grid_size.x * grid_size.y), tile_size(tile_size) {
+Grid::Grid(const sf::Vector2i grid_size, const sf::Vector2f& ts) noexcept :
+width(grid_size.x), height(grid_size.y), count(grid_size.x * grid_size.y), tile_size(ts) {
+    shader.loadFromFile("shaders/grid.vert", "shaders/grid.frag"));
     vertices = sf::VertexArray(sf::Quads, 4 * count);
     for(unsigned int i = 0; i < count; i++) {
-        sf::Vector2i ind{i % width, i / width};
-        sf::Vector2f pos{ind.x * tile_size.x, ind.y * tile_size.y};
-        sf::Vector2f size =  tile_size;
-        setQuad(&vertices[4 * i], {pos.x, pos.y, size.x, size.y});
+        // position indices
+        int indx = i % width;
+        int indy = i / width;
+        sf::FloatRect rect = {indx * ts.x, indy * ts.y, ts.x, ts.y};
+        setQuad(&vertices[4 * i], rect);
         setQuadColor(&vertices[4 * i], {0, 0, 255});
     }
+    
 }
 
 void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+    states.shader = &shader;
     target.draw(vertices, states);
 }
 
-std::array<sf::Vector3i, 3> Grid::getNearbyCornerData(const sf::Vector2i& p, unsigned int corner) const {
+std::array<sf::Vector3i, 4> Grid::getNearbyCornerData(const sf::Vector2i& p, unsigned int corner) const {
     // this function returns an array of vectors
     // each one holds the index of some adjacent tile and the corner index
     // this function is used to calclulate what tile and which one of it's
@@ -28,12 +32,15 @@ std::array<sf::Vector3i, 3> Grid::getNearbyCornerData(const sf::Vector2i& p, uns
 
     // instead of using vec3 for the data I should just make a 
     // struct for better readability but I'm too lazy
-    std::array<sf::Vector3i, 3> result;
+    std::array<sf::Vector3i, 4> result;
     switch(corner) {
-        case 0: result = {{{p.x - 1, p.y, 1}, {p.x - 1, p.y - 1, 2}, {p.x, p.y - 1, 3}}};
-        case 1: result = {{{p.x, p.y - 1, 2}, {p.x + 1, p.y - 1, 3}, {p.x + 1, p.y, 0}}};
-        case 2: result = {{{p.x + 1, p.y, 3}, {p.x + 1, p.y + 1, 0}, {p.x, p.y + 1, 1}}};
-        case 3: result = {{{p.x, p.y + 1, 0}, {p.x - 1, p.y + 1, 1}, {p.x - 1, p.y, 2}}};
+        case 0: result = {{{p.x, p.y, 0}, {p.x - 1, p.y, 1}, {p.x - 1, p.y - 1, 2}, {p.x, p.y - 1, 3}}};
+
+        case 1: result = {{{p.x, p.y, 1}, {p.x, p.y - 1, 2}, {p.x + 1, p.y - 1, 3}, {p.x + 1, p.y, 0}}};
+
+        case 2: result = {{{p.x, p.y, 2}, {p.x + 1, p.y, 3}, {p.x + 1, p.y + 1, 0}, {p.x, p.y + 1, 1}}};
+
+        case 3: result = {{{p.x, p.y, 3}, {p.x, p.y + 1, 0}, {p.x - 1, p.y + 1, 1}, {p.x - 1, p.y, 2}}};
     }
     return result;
 }
@@ -44,18 +51,12 @@ void Grid::setTileCornerColor(const sf::Vector2i& position, unsigned int corner,
     // |    |
     // 3 -- 2
     unsigned int t_index = position.x + position.y * width;
-    if(t_index > count ||  {
-        std::cerr << "index out of range or "
-        throw std::out_of_range;
-    }
-    if(corner > 3) {
-        std::cerr << "index out of range or "
-        throw std::out_of_range;
-    }
+    if(t_index > count) throw std::out_of_range("in Grid::setTileCornerColor() invalid tile position");
+    if(corner > 3) throw std::out_of_range("in Grid::setTileCornerColor() corner index is out of bounds");
     auto nearby = getNearbyCornerData(position, corner);
-    for(unsigned int i = 0; i < 3; i++) {
-        auto data = nearby[i];
-        int index = 4 * (data.x + data.y * width) + data.z;
+    // color other 3 vertices arround so the color "bleeds" to other tiles
+    for(auto& n : nearby) {
+        int index = 4 * (n.x + n.y * width) + n.z;
         if(vertexExists(index)) vertices[index].color = color;
     }
 }

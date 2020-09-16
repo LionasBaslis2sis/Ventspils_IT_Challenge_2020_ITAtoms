@@ -4,10 +4,8 @@ Simulation::Simulation(const sf::VideoMode& mode) noexcept {
     map.loadFromFile("res/map.png");
     map_spr = sf::Sprite(map);
     grid = Grid({24, 16}, {32, 32});
-    // color random vertices green
-    for(unsigned int i = 0; i < grid.count; i++) {
-        if(rand() % 2 == 1) grid.setTileCornerColor({i % grid.width, i / grid.height}, rand() % 4, {0, 255, 0});
-    }
+    
+    grid.setTileCornerColor({1, 1}, 0, {0, 255, 0});
 }
 
 void Simulation::iterate(int dt) noexcept {
