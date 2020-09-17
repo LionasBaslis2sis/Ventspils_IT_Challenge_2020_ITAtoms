@@ -2,7 +2,7 @@
 #include <TGUI/TGUI.hpp>
 #include <bits/stdc++.h>
 
-#include "src/simulation.hpp"
+#include "simulation.hpp"
 
 int main(const int argc, const char** argv) {
 	// set random seed
@@ -65,7 +65,7 @@ int main(const int argc, const char** argv) {
 		if(update) {
 			dt = now - last;
 			t += dt;
-			sim.iterate(dt);
+			sim.iterate(dt, t);
 		}
 		sstream << std::fixed << std::setprecision(2) << t / 1000.0f;
 		info->setText("time: " + sstream.str());

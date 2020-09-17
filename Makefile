@@ -6,10 +6,5 @@ LIBS = -lm -ltgui-s -lsfml-graphics-s -lsfml-window-s -lsfml-system-s \
 -lflac -lvorbisenc -lvorbisfile -lvorbis -logg -lsfml-network-s \
 -lws2_32 -lwinmm
 
-CPPS = src/*.cpp
-CXX = g++
-CXXFLAGS = -std=c++17
-LINK_FLAGS = -DSFML_STATIC -DTGUI_STATIC
-
 all:
-	@ $(CXX) $(CXXFLAGS) main.cpp $(CPPS) -o main.exe $(LINK_FLAGS) $(INCS) $(LIBS)
+	@ g++ -std=c++17 main.cpp simulation.cpp -o main.exe -DSFML_STATIC -DTGUI_STATIC $(INCS) $(LIBS)
